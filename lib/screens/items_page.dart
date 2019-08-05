@@ -4,6 +4,7 @@ import 'package:flutter_counter/item.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_counter/components/InfoButton.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:flutter_counter/components/TheAlertDialog.dart';
 
 
 
@@ -25,59 +26,37 @@ class _ItemsPageState extends State<ItemsPage> {
   List<Item> itemList = [];
 
   @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-    DatabaseHelper helper = DatabaseHelper.instance;
-    helper.close();
-  }
-
-
-  @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    DatabaseHelper helper = DatabaseHelper.instance;
+    helper.initDatabase();
     _readAll();
   }
 
   TextEditingController _textFieldController = TextEditingController();
 
-  _displayDialog(BuildContext context) async {
+  displayDialog(BuildContext context) async {
     return showDialog(
         context: context,
         builder: (context) {
-          return AlertDialog(
-            title: Text('Add an Item'),
-            content: TextField(
-              controller: _textFieldController,
-              decoration: InputDecoration(hintText: "Enter Item"),
-            ),
-            actions: <Widget>[
-              FlatButton(
-                child: Text('CANCEL'),
-                onPressed: () {
-                  _textFieldController.clear();
-                  Navigator.of(context).pop();
-                },
-              ),
-              FlatButton(
-                child: Text('ADD'),
-                onPressed: () {
-                  addingText = _textFieldController.value.text;
-                  _textFieldController.clear();
-                  print(addingText);
-                  _addItem(addingText, 0);
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
+          return new TheAlertDialog(
+            textFieldController: _textFieldController,
+            addingText: addingText,
+            onPressedAdd: () {
+              addingText = _textFieldController.value.text;
+              _textFieldController.clear();
+              print(addingText);
+              _addItem(addingText, 0);
+              Navigator.of(context).pop();
+              },
+            );
         });
   }
 
   _readAll() async {
     DatabaseHelper helper = DatabaseHelper.instance;
-    itemList = await helper.queryAllItems();
+    itemList = await helper.queryAllItems(widget.tableName);
     setState(() {});
     for (var item in itemList) {
       print("Item = ID:${item.id}, Name:${item.name}, Number:${item.number}");
@@ -86,13 +65,18 @@ class _ItemsPageState extends State<ItemsPage> {
 
   _update(Item item) async {
     DatabaseHelper helper = DatabaseHelper.instance;
-    var x = await helper.update(item);
+    var x = await helper.update(item,widget.tableName);
     setState(() {});
   }
 
   _delete(Item item) async {
     DatabaseHelper helper = DatabaseHelper.instance;
-    helper.delete(item.id, "items");
+    helper.delete(item.id,widget.tableName);
+  }
+
+  _getAllTables(){
+    DatabaseHelper helper = DatabaseHelper.instance;
+    helper.getTables();
   }
 
   _addItem(name, number) async {
@@ -100,7 +84,7 @@ class _ItemsPageState extends State<ItemsPage> {
     item.name = name;
     item.number = number;
     DatabaseHelper helper = DatabaseHelper.instance;
-    int id = await helper.insert(item);
+    int id = await helper.insert(item,widget.tableName);
     print('inserted row: $id');
     _readAll();
   }
@@ -119,9 +103,12 @@ class _ItemsPageState extends State<ItemsPage> {
             floating: false,
             primary: true,
             expandedHeight: 80.0,
+            leading: IconButton(icon: Icon(Icons.message), onPressed: (){
+              _getAllTables();
+            }),
             actions: <Widget>[
               IconButton(icon: Icon(Icons.add), onPressed: (){
-                _displayDialog(context);
+                displayDialog(context);
                }),
             ],
           ),
@@ -215,3 +202,4 @@ class _ItemsPageState extends State<ItemsPage> {
     );
   }
 }
+

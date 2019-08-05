@@ -24,14 +24,21 @@ class DatabaseHelper {
 
   // Only allow a single open connection to the database.
   static Database _database;
+
+  initDB()async {
+    Directory documentsDirectory = await getApplicationDocumentsDirectory();
+    String path = join(documentsDirectory.path, _databaseName);
+    _database = await openDatabase(path, version: _databaseVersion);
+  }
+
   Future<Database> get database async {
     if (_database != null) return _database;
-    _database = await _initDatabase();
+    _database = await initDatabase();
     return _database;
   }
 
   // open the database
-  _initDatabase() async {
+  initDatabase() async {
     // The path_provider plugin gets the right directory for Android or iOS.
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, _databaseName);
@@ -54,15 +61,13 @@ class DatabaseHelper {
 
   // Database helper methods:
 
-  Future<int> insert(Item item) async {
-    Database db = await database;
-    int id = await db.insert(tableItems, item.toMap());
+  Future<int> insert(Item item, String tableName) async {
+    int id = await _database.insert(tableName, item.toMap());
     return id;
   }
 
   void createTable(tableName) async{
-    Database db = await database;
-    await db.execute('''
+    await _database.execute('''
               CREATE TABLE $tableName (
                 $columnId INTEGER PRIMARY KEY,
                 $columnName TEXT NOT NULL,
@@ -70,19 +75,25 @@ class DatabaseHelper {
               )
               ''');
   }
+  void deleteTable(tableName) async{
+    await _database.execute('''DROP TABLE $tableName;''');
+  }
   
-  Future getTables() async{
-    Database db = await database;
-    await db.execute('''
-        SELECT TABLE_NAME
-        FROM INFORMATION_SCHEMA.TABLES
-        WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_CATALOG='MyDatabase'
+  Future<List<Map<String,dynamic>>> getTables() async{
+    print(_database);
+    var tables = await _database.rawQuery('''
+        SELECT name 
+        FROM sqlite_master 
+        WHERE type='table'
     ''');
+    for(var table in tables){
+      print(table["name"]);
+    }
+    return tables;
   }
 
-  Future<Item> queryItem(int id) async {
-    Database db = await database;
-    List<Map> maps = await db.query(tableItems,
+  Future<Item> queryItem(int id,String tableName) async {
+    List<Map> maps = await _database.query(tableName,
         columns: [columnId, columnName, columnNumber],
         where: '$columnId = ?',
         whereArgs: [id]);
@@ -92,10 +103,9 @@ class DatabaseHelper {
     return null;
   }
 
-  Future<List<Item>> queryAllItems() async {
-    Database db = await database;
+  Future<List<Item>> queryAllItems(String tableName) async {
     List<Item> theList = [];
-    List<Map> maps = await db.query(tableItems,
+    List<Map> maps = await _database.query(tableName,
         columns: [columnId, columnName, columnNumber]);
     for (var item in maps){
       theList.add(Item.fromMap(item));
@@ -104,18 +114,15 @@ class DatabaseHelper {
   }
 
   void  delete(int id, String tableName) async {
-    Database db = await database;
-    await db.delete(tableName, where: '$columnId = ?', whereArgs: [id]);
+    await _database.delete(tableName, where: '$columnId = ?', whereArgs: [id]);
   }
   void  close() async {
-    Database db = await database;
-    await db.close();
+    await _database.close();
   }
 
-  Future update(Item item)async {
-    Database db = await database;
+  Future update(Item item,String tableName)async {
     print(item.number);
-    await db.update(tableItems, item.toMap(),
+    await _database.update(tableName, item.toMap(),
         where: '$columnId = ?', whereArgs: [item.id]);
   }
 }

@@ -11,7 +11,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData.light(),
-      home: ItemsPage(tableName: "Items",),
+      home: CategoryPage(),
+      //home: ItemsPage(tableName: "Items"),
     );
   }
 }
