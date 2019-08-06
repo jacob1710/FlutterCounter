@@ -94,7 +94,7 @@ class _ItemsPageState extends State<ItemsPage> {
       body: CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
-            title: Text("Title"),
+            title: Text(widget.tableName),
             centerTitle: true,
             floating: false,
             primary: true,

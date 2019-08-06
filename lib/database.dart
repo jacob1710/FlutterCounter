@@ -122,8 +122,11 @@ class DatabaseHelper {
 
 
   
-  void updateTableName(){
+  void updateTableName(oldName,newName)async{
     //TODO: Finish this function
+    await _database.execute('''
+      ALTER TABLE $oldName
+      RENAME TO $newName;''');
   }
 
   Future update(Item item,String tableName)async {

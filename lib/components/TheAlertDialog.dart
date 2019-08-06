@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 
 class TheAlertDialog extends StatelessWidget {
 
-  TheAlertDialog({this.textFieldController,this.addingText,this.onPressedAdd,this.titleText,this.hintText});
+  TheAlertDialog({this.textFieldController,this.addingText,this.onPressedAdd,this.titleText,this.hintText,this.addButtonText = "ADD"});
 
   final TextEditingController textFieldController;
   final String addingText;
   final Function onPressedAdd;
   final String titleText;
   final String hintText;
+  final String addButtonText;
 
 
   @override
@@ -28,7 +29,7 @@ class TheAlertDialog extends StatelessWidget {
           },
         ),
         FlatButton(
-          child: Text('ADD'),
+          child: Text(addButtonText),
           onPressed: onPressedAdd
         ),
       ],
