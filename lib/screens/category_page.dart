@@ -12,6 +12,7 @@ class CategoryPage extends StatefulWidget {
 }
 
 
+
  
 
 class _CategoryPageState extends State<CategoryPage> {
@@ -19,7 +20,7 @@ class _CategoryPageState extends State<CategoryPage> {
   String addingText;
 
 
-  _getAllTables() async {
+  _getAllTablesInit() async {
       DatabaseHelper helper = DatabaseHelper.instance;
       await helper.initDB();
       var tables =  await helper.getTables();
@@ -32,9 +33,38 @@ class _CategoryPageState extends State<CategoryPage> {
         
       });
   }
-  _addTable(String tableName){
+
+  _getAllTables() async {
+      DatabaseHelper helper = DatabaseHelper.instance;
+      var tables =  await helper.getTables();
+      list = [];
+      for (var table in tables){
+        list.add(table["name"]);
+      }
+      print(list);
+      setState(() {
+      
+      });
+  }
+
+  Future<List<String>>_returnTables() async{
+      DatabaseHelper helper = DatabaseHelper.instance;
+      var tables =  await helper.getTables();
+      list = [];
+      for (var table in tables){
+        list.add(table["name"]);
+      }
+      return list;
+  }
+
+  _addTable(String tableName)async{
     DatabaseHelper helper = DatabaseHelper.instance;
-    helper.createTable(tableName);
+    var currentTables = await _returnTables();
+    if (currentTables.contains(tableName)){
+      print("Name Already Used");
+    }else{
+      helper.createTable(tableName);
+    }
     _getAllTables();
   }
 
@@ -47,6 +77,28 @@ class _CategoryPageState extends State<CategoryPage> {
           return new TheAlertDialog(
             textFieldController: _textFieldController,
             addingText: addingText,
+            titleText: "Add an Item",
+            hintText: "Enter Item",
+            onPressedAdd: () {
+              addingText = _textFieldController.value.text;
+              _textFieldController.clear();
+              print(addingText);
+              _addTable(addingText);
+              Navigator.of(context).pop();
+              },
+            );
+        });
+  }
+
+  displayEditDialog(BuildContext context) async {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return new TheAlertDialog(
+            textFieldController: _textFieldController,
+            addingText: addingText,
+            titleText: "Edit Name",
+            hintText: "Enter Item",
             onPressedAdd: () {
               addingText = _textFieldController.value.text;
               _textFieldController.clear();
@@ -60,10 +112,9 @@ class _CategoryPageState extends State<CategoryPage> {
 
   @override
   void initState(){
-    // TODO: implement initState
     super.initState();
     setState(() {
-          _getAllTables();
+          _getAllTablesInit();
     });
     
   }

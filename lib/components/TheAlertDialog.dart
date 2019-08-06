@@ -2,19 +2,22 @@ import 'package:flutter/material.dart';
 
 class TheAlertDialog extends StatelessWidget {
 
-  TheAlertDialog({this.textFieldController,this.addingText,this.onPressedAdd});
+  TheAlertDialog({this.textFieldController,this.addingText,this.onPressedAdd,this.titleText,this.hintText});
 
   final TextEditingController textFieldController;
   final String addingText;
-  Function onPressedAdd;
+  final Function onPressedAdd;
+  final String titleText;
+  final String hintText;
+
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Add an Item'),
+      title: Text(titleText),
       content: TextField(
         controller: textFieldController,
-        decoration: InputDecoration(hintText: "Enter Item"),
+        decoration: InputDecoration(hintText: hintText),
       ),
       actions: <Widget>[
         FlatButton(

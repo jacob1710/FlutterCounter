@@ -120,6 +120,12 @@ class DatabaseHelper {
     await _database.close();
   }
 
+
+  
+  void updateTableName(){
+    //TODO: Finish this function
+  }
+
   Future update(Item item,String tableName)async {
     print(item.number);
     await _database.update(tableName, item.toMap(),

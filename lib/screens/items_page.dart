@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_counter/database.dart';
 import 'package:flutter_counter/item.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_counter/components/InfoButton.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_counter/components/TheAlertDialog.dart';
 
@@ -27,7 +26,6 @@ class _ItemsPageState extends State<ItemsPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     DatabaseHelper helper = DatabaseHelper.instance;
     helper.initDatabase();
@@ -43,6 +41,8 @@ class _ItemsPageState extends State<ItemsPage> {
           return new TheAlertDialog(
             textFieldController: _textFieldController,
             addingText: addingText,
+            titleText: 'Add an Item',
+            hintText: "Enter Item",
             onPressedAdd: () {
               addingText = _textFieldController.value.text;
               _textFieldController.clear();
@@ -65,7 +65,7 @@ class _ItemsPageState extends State<ItemsPage> {
 
   _update(Item item) async {
     DatabaseHelper helper = DatabaseHelper.instance;
-    var x = await helper.update(item,widget.tableName);
+    await helper.update(item,widget.tableName);
     setState(() {});
   }
 
@@ -74,10 +74,6 @@ class _ItemsPageState extends State<ItemsPage> {
     helper.delete(item.id,widget.tableName);
   }
 
-  _getAllTables(){
-    DatabaseHelper helper = DatabaseHelper.instance;
-    helper.getTables();
-  }
 
   _addItem(name, number) async {
     Item item = Item();
@@ -103,9 +99,6 @@ class _ItemsPageState extends State<ItemsPage> {
             floating: false,
             primary: true,
             expandedHeight: 80.0,
-            leading: IconButton(icon: Icon(Icons.message), onPressed: (){
-              _getAllTables();
-            }),
             actions: <Widget>[
               IconButton(icon: Icon(Icons.add), onPressed: (){
                 displayDialog(context);

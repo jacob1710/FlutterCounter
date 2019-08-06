@@ -2,8 +2,6 @@
 //
 //     final item = itemFromJson(jsonString);
 
-import 'dart:convert';
-
 final String tableItems = 'items';
 final String columnId = '_id';
 final String columnName = 'name';
