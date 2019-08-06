@@ -1,6 +1,6 @@
-# flutter_counter
+# Flutter Counter
 
-A new Flutter application.
+Simple categories and items counter app, incrementing each item, reducing each item and resetting each item possible at the moment.
 
 ## Getting Started
 
