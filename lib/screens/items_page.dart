@@ -4,6 +4,8 @@ import 'package:flutter_counter/item.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_counter/components/TheAlertDialog.dart';
+import 'package:flutter_counter/constants.dart';
+import 'package:flutter_counter/components/ShowErrorDialog.dart';
 
 
 
@@ -34,7 +36,7 @@ class _ItemsPageState extends State<ItemsPage> {
 
   TextEditingController _textFieldController = TextEditingController();
 
-  displayDialog(BuildContext context) async {
+  void _displayAddDialog(BuildContext context) async {
     return showDialog(
         context: context,
         builder: (context) {
@@ -53,8 +55,35 @@ class _ItemsPageState extends State<ItemsPage> {
             );
         });
   }
+  void _displayEditDialog(BuildContext context, Item item) async {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return new TheAlertDialog(
+            textFieldController: _textFieldController,
+            addingText: addingText,
+            titleText: 'Edit Name',
+            hintText: "Enter New Name",
+            onPressedAdd: () async{
+              addingText = _textFieldController.value.text;
+              _textFieldController.clear();
+              print(addingText);
+              //Validation
+              _changeItemName(item, addingText);
+              Navigator.of(context).pop();
+              },
+            );
+        });
+  }
 
-  _readAll() async {
+  void _changeItemName(Item item, String textToUpdate)async{
+    DatabaseHelper helper = DatabaseHelper.instance;
+    item.name = textToUpdate;
+    await helper.update(item,widget.tableName);
+    setState(() {});
+  }
+
+  void _readAll() async {
     DatabaseHelper helper = DatabaseHelper.instance;
     itemList = await helper.queryAllItems(widget.tableName);
     setState(() {});
@@ -63,19 +92,19 @@ class _ItemsPageState extends State<ItemsPage> {
     }
   }
 
-  _update(Item item) async {
+  void _update(Item item) async {
     DatabaseHelper helper = DatabaseHelper.instance;
     await helper.update(item,widget.tableName);
     setState(() {});
   }
 
-  _delete(Item item) async {
+  void _delete(Item item) async {
     DatabaseHelper helper = DatabaseHelper.instance;
     helper.delete(item.id,widget.tableName);
   }
 
 
-  _addItem(name, number) async {
+  void _addItem(name, number) async {
     Item item = Item();
     item.name = name;
     item.number = number;
@@ -85,8 +114,6 @@ class _ItemsPageState extends State<ItemsPage> {
     _readAll();
   }
 
-
-  final List<String> list = <String>["a", "b", "c", "d", "e", "f"];
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +128,7 @@ class _ItemsPageState extends State<ItemsPage> {
             expandedHeight: 80.0,
             actions: <Widget>[
               IconButton(icon: Icon(Icons.add), onPressed: (){
-                displayDialog(context);
+                _displayAddDialog(context);
                }),
             ],
           ),
@@ -158,6 +185,9 @@ class _ItemsPageState extends State<ItemsPage> {
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: ListTile(
+                          onLongPress: (){
+                            _displayEditDialog(context,itemList[index]);
+                            },
                           leading: CircleAvatar(
                             backgroundColor: Colors.indigoAccent,
                             child: Text(

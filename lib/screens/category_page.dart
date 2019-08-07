@@ -4,6 +4,7 @@ import 'package:flutter_counter/database.dart';
 import 'package:flutter_counter/components/TheAlertDialog.dart';
 import 'package:flutter_counter/constants.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:flutter_counter/components/ShowErrorDialog.dart';
 
 
 
@@ -97,30 +98,6 @@ class _CategoryPageState extends State<CategoryPage> {
 
   TextEditingController _textFieldController = TextEditingController();
 
-
-  void _showErrorDialog(String errorName) {
-    // flutter defined function
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        // return object of type Dialog
-        return AlertDialog(
-          title: Text("Error"),
-          content: Text(errorName),
-          actions: <Widget>[
-            // usually buttons at the bottom of the dialog
-            FlatButton(
-              child: Text("Close"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   _displayAddDialog(BuildContext context) async {
     return showDialog(
         context: context,
@@ -158,7 +135,7 @@ class _CategoryPageState extends State<CategoryPage> {
               var returnCode = await _changeTableName(currentTableName, addingText);
               Navigator.of(context).pop();
               if (returnCode != 200){
-                _showErrorDialog("Couldn't change name: ${kNameErrorCodes[returnCode]}");
+                showErrorDialog(context, "Couldn't change name: ${kNameErrorCodes[returnCode]}");
               }
               },
             );
